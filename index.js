@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.bmhyihx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -38,6 +38,45 @@ async function run() {
       res.send(result);
     });
 
+    //single craft
+    app.get("/allcraft/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await craftCollection.findOne(query);
+      res.send(result);
+    });
+
+    // my craft
+    app.get("/myArtCraft/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await craftCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    //update
+    app.put("/updateCraft/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedCraft = req.body;
+
+      const craft = {
+        $set: {
+          craftImage: updatedCraft.craftImage,
+          itemName: updatedCraft.itemName,
+          subCategoryName: updatedCraft.subCategoryName,
+          shortDescription: updatedCraft.shortDescription,
+          price: updatedCraft.price,
+          rating: updatedCraft.rating,
+          processTime: updatedCraft.processTime,
+          customization: updatedCraft.customization,
+          stock: updatedCraft.stock,
+        },
+      };
+      const result = await craftCollection.updateOne(filter, craft, options);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
