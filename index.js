@@ -25,6 +25,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const craftCollection = client.db("craftDB").collection("craft");
+    const categoryCollection = client.db("craftDB").collection("category");
     // write api here
     app.post("/allcraft", async (req, res) => {
       const newCraft = req.body;
@@ -83,6 +84,14 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await craftCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //categories api
+    // add category
+    app.post("/categories", async (req, res) => {
+      const newCategory = req.body;
+      const result = await categoryCollection.insertOne(newCategory);
       res.send(result);
     });
 
