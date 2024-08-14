@@ -25,7 +25,10 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const craftCollection = client.db("craftDB").collection("craft");
-    const categoryCollection = client.db("craftDB").collection("category");
+    const subCategoryCollection = client
+      .db("craftDB")
+      .collection("subCategory");
+
     // write api here
     app.post("/allcraft", async (req, res) => {
       const newCraft = req.body;
@@ -91,13 +94,21 @@ async function run() {
     // add category
     app.post("/categories", async (req, res) => {
       const newCategory = req.body;
-      const result = await categoryCollection.insertOne(newCategory);
+      const result = await subCategoryCollection.insertOne(newCategory);
       res.send(result);
     });
 
     app.get("/categories", async (req, res) => {
-      const cursor = categoryCollection.find();
+      const cursor = subCategoryCollection.find();
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // same category craft
+    app.get("/sameCategory/:subCategory", async (req, res) => {
+      const subCategory = req.params.subCategory;
+      const query = { subCategoryName: subCategory };
+      const result = await craftCollection.find(query).toArray();
       res.send(result);
     });
 
